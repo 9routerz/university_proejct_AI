@@ -1,0 +1,20 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Secrets
+.env
+.streamlit/secrets.toml
+
+# Tool caches and logs
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# Stray file visible in the project folder
+=

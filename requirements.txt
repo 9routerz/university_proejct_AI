@@ -1,0 +1,27 @@
+# LLM
+groq
+
+# Agent
+langgraph
+langchain-groq
+langchain-core
+
+# Sandbox
+e2b-code-interpreter
+
+# Session store
+redis
+
+# API
+fastapi
+uvicorn[standard]
+
+# UI
+streamlit
+
+# Config
+python-dotenv
+
+# Utilities
+pandas
+uuid
