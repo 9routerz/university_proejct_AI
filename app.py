@@ -3,7 +3,7 @@ import requests
 import base64
 
 # ── Config ────────────────────────────────────────────────────────────────────
-API_URL = "http://127.0.0.1:8000"
+API_URL = st.secrets.get("API_URL", "http://127.0.0.1:8000").rstrip("/")
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
