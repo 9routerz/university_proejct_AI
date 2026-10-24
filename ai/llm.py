@@ -1,6 +1,6 @@
 import logging
 import anthropic
-from config import (
+from backend.config import (
     CLAUDE_API_KEY, CLAUDE_BASE_URL, CLAUDE_MODEL,
     CLAUDE_MODEL_FAST, CLAUDE_MODEL_CODE, CLAUDE_MODEL_CHAT, CLAUDE_MODEL_JUDGE,
     CLAUDE_FALLBACK_MODELS,

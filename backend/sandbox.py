@@ -3,7 +3,7 @@ import os
 import json
 import redis
 from e2b_code_interpreter import Sandbox
-from config import (
+from backend.config import (
     E2B_API_KEY,
     REDIS_URL,
     SANDBOX_TIMEOUT,

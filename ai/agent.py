@@ -1,16 +1,16 @@
 import re
 from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, END
-from config import BLOCKED_PROMPT_PATTERNS
-from llm import ask_claude, ask_claude_with_model
-from tools import (
+from backend.config import BLOCKED_PROMPT_PATTERNS
+from ai.llm import ask_claude, ask_claude_with_model
+from backend.sandbox import (
     execute_code,
     append_to_history,
     get_history,
     is_score_used,
     mark_score_used,
 )
-from scorer import score_session
+from ai.scorer import score_session
 
 # ── Agent state ───────────────────────────────────────────────────────────────
 class AgentState(TypedDict):

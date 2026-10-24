@@ -20,4 +20,5 @@ venv/
 =
 
 # Frontend settings with secrets
-php-frontend/config.local.php
+frontend/config.local.php
+DP.jpg

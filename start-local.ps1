@@ -10,19 +10,19 @@ Set-Location $PSScriptRoot
 $venv = "$env:USERPROFILE\dscomp-venv"
 if (-not (Test-Path "$venv\Scripts\python.exe")) {
     python -m venv $venv
-    & "$venv\Scripts\python.exe" -m pip install -r requirements.txt
+    & "$venv\Scripts\python.exe" -m pip install -r backend\requirements.txt
 }
 
 $php = (Get-Command php -ErrorAction SilentlyContinue).Source
 if (-not $php) { $php = "C:\xampp\php\php.exe" }
 
-if (-not (Select-String -Path .env -Pattern '^E2B_API_KEY=e2b_' -Quiet)) {
-    Write-Host "E2B_API_KEY is missing in .env - add it first (https://e2b.dev > Dashboard > API Keys)." -ForegroundColor Red
+if (-not (Select-String -Path backend\.env -Pattern '^E2B_API_KEY=e2b_' -Quiet)) {
+    Write-Host "E2B_API_KEY is missing in backend\.env - add it first (https://e2b.dev > Dashboard > API Keys)." -ForegroundColor Red
     exit 1
 }
 
-Start-Process -FilePath "$venv\Scripts\python.exe" -ArgumentList "-m uvicorn main:app --port 8000" -WorkingDirectory $PSScriptRoot
-Start-Process -FilePath $php -ArgumentList "-S 127.0.0.1:8080 -t php-frontend" -WorkingDirectory $PSScriptRoot
+Start-Process -FilePath "$venv\Scripts\python.exe" -ArgumentList "-m uvicorn backend.main:app --port 8000" -WorkingDirectory $PSScriptRoot
+Start-Process -FilePath $php -ArgumentList "-S 127.0.0.1:8080 -t frontend" -WorkingDirectory $PSScriptRoot
 
 Write-Host "Backend: http://127.0.0.1:8000/health"
 Write-Host "Open the UI: http://127.0.0.1:8080" -ForegroundColor Green

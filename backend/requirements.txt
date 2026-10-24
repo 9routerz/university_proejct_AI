@@ -15,8 +15,6 @@ fakeredis   # only used when REDIS_URL=memory:// (local testing)
 fastapi
 uvicorn[standard]
 
-# UI
-streamlit
 
 # Config
 python-dotenv

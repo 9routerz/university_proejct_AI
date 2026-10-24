@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Settings come from backend/.env (or a .env in the project root)
+BACKEND_DIR = Path(__file__).resolve().parent
+load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BACKEND_DIR.parent / ".env")
 
 # ── LLM ───────────────────────────────────────────────────────────────────────
 CLAUDE_API_KEY      = os.getenv("CLAUDE_API_KEY")                     # your 9router key
@@ -45,7 +49,7 @@ SESSION_TTL         = int(os.getenv("SESSION_TTL", "5400"))          # total ses
 
 # ── Competition ───────────────────────────────────────────────────────────────
 COMPETITION_TIME_LIMIT = int(os.getenv("COMPETITION_TIME_LIMIT", "3600"))  # seconds (default 60 mins)
-CSV_PATH               = os.getenv("CSV_PATH", "data/messy_dataset.csv")
+CSV_PATH               = str(BACKEND_DIR / os.getenv("CSV_PATH", "data/messy_dataset.csv"))  # relative to the backend folder
 MAX_SCORE              = int(os.getenv("MAX_SCORE", "100"))
 
 # ── Security ──────────────────────────────────────────────────────────────────

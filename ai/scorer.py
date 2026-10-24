@@ -1,5 +1,5 @@
-from llm import ask_claude
-from tools import get_history, get_session_meta
+from ai.llm import ask_claude
+from backend.sandbox import get_history, get_session_meta
 
 
 def score_session(session_id: str) -> dict:

@@ -5,13 +5,13 @@ import logging
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from config import (
+from backend.config import (
     validate_config, COMPETITION_TIME_LIMIT, SESSION_TTL,
     BACKEND_SECRET, ADMIN_KEY, CORS_ORIGINS, SHOW_DOCS,
     SELECTABLE_MODELS, CLAUDE_MODEL_CODE,
 )
-from tools import r, create_sandbox, kill_sandbox, get_session_meta
-from agent import run_agent
+from backend.sandbox import r, create_sandbox, kill_sandbox, get_session_meta
+from ai.agent import run_agent
 
 # ── Validate env on startup ───────────────────────────────────────────────────
 validate_config()
@@ -202,7 +202,7 @@ async def get_score(session_id: str):
         raise HTTPException(status_code=403, detail="You have already received your score.")
 
     try:
-        from scorer import score_session
+        from ai.scorer import score_session
         score_result = score_session(session_id)
 
         # Mark score as used
