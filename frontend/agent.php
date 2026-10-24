@@ -114,5 +114,5 @@ page_header('AI Agent', 'agent.php', 'agent-page');
   </div>
 </section>
 
-<script src="app.js" data-has-session="<?= $hasSession ? '1' : '0' ?>"></script>
+<script src="app.js?v=<?= filemtime(__DIR__ . '/app.js') ?>" data-has-session="<?= $hasSession ? '1' : '0' ?>"></script>
 <?php page_footer(false); ?>

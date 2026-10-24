@@ -58,7 +58,7 @@ function page_header($title, $active, $bodyClass = '') {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=<?= filemtime(__DIR__ . '/../assets/style.css') ?>">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d4ed8'/%3E%3Ctext x='16' y='22' font-size='15' text-anchor='middle' font-family='Arial' font-weight='700' fill='%23ffffff'%3EAI%3C/text%3E%3C/svg%3E">
 </head>
 <body class="<?= htmlspecialchars($bodyClass) ?>">
@@ -113,7 +113,7 @@ function page_footer($showFull = true) {
 <?php else: ?>
 <div class="mini-footer">Created by <a href="https://novatixsolution.com" target="_blank" rel="noopener" class="novatix">Novatix Solution</a> · <a href="https://novatixsolution.com" target="_blank" rel="noopener" class="novatix">novatixsolution.com</a></div>
 <?php endif; ?>
-<script src="assets/site.js"></script>
+<script src="assets/site.js?v=<?= filemtime(__DIR__ . '/../assets/site.js') ?>"></script>
 </body>
 </html>
 <?php

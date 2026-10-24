@@ -554,3 +554,29 @@ body.menu-open::after { content: ""; position: fixed; inset: var(--nav-h) 0 0 0;
   .chat-top { padding: 6px 12px; }
   #messages { padding: 10px; }
 }
+
+/* ── Suggested questions in the empty chat ──────────────────────────────── */
+.suggest { max-width: 920px; margin: 4px auto 0; padding-left: 44px; }
+.suggest-title { font-size: 14px; font-weight: 600; color: var(--muted); margin: 0 0 12px; }
+.suggest-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.suggest-group > span {
+  flex: 0 0 100%; font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--blue);
+}
+.suggest-group.red > span { color: var(--red); }
+.suggest-group.green > span { color: var(--green); }
+.suggest-group.navy > span { color: var(--navy); }
+.suggest-btn {
+  font: 500 14px/1.35 var(--font); text-align: left; color: var(--text); cursor: pointer;
+  background: #fff; border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 10px;
+  padding: 10px 14px; box-shadow: var(--shadow-sm); transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.suggest-group.red .suggest-btn { border-left-color: var(--red); }
+.suggest-group.green .suggest-btn { border-left-color: var(--green); }
+.suggest-group.navy .suggest-btn { border-left-color: var(--navy); }
+.suggest-btn:hover { border-color: var(--blue); box-shadow: var(--shadow); }
+.suggest-btn:active { transform: scale(.98); }
+@media (max-width: 768px) {
+  .suggest { padding-left: 0; }
+  .suggest-btn { flex: 1 1 100%; font-size: 15px; padding: 12px 14px; min-height: 46px; }
+  .suggest-group { gap: 7px; margin-bottom: 12px; }
+}
