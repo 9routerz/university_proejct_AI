@@ -14,8 +14,8 @@ Options -Indexes
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
-# bootstrap.php is only included by other PHP files, never opened directly
-<FilesMatch "^(bootstrap|layout)\.php$">
+# Files only included by other PHP files (and the settings file), never opened directly
+<FilesMatch "^(bootstrap|layout|config\.local)\.php$">
     Require all denied
 </FilesMatch>
 <FilesMatch "\.(env|ini|log|md|sh|sql|bak)$">

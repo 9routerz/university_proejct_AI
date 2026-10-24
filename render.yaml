@@ -30,7 +30,7 @@ services:
       - key: E2B_API_KEY
         sync: false
       - key: BACKEND_SECRET
-        generateValue: true     # copy this value into php-frontend/.env on Hostinger
+        sync: false             # paste the same value the Hostinger frontend uses (php-frontend/config.local.php)
       - key: ADMIN_KEY
         generateValue: true
       - key: CSV_PATH

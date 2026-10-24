@@ -17,6 +17,14 @@ function load_env_file($path) {
 }
 load_env_file(dirname(__DIR__) . '/ds-competition.env') || load_env_file(__DIR__ . '/.env');
 
+// config.local.php works where .env files can't be uploaded (e.g. some deploy tools).
+// It returns ['BACKEND_URL' => ..., 'BACKEND_SECRET' => ..., 'ACCESS_CODE' => ...].
+if (is_readable(__DIR__ . '/config.local.php')) {
+    foreach ((array) include __DIR__ . '/config.local.php' as $key => $value) {
+        if (getenv($key) === false) putenv("$key=$value");
+    }
+}
+
 define('BACKEND_URL', rtrim(getenv('BACKEND_URL') ?: 'http://127.0.0.1:8000', '/'));
 define('BACKEND_SECRET', getenv('BACKEND_SECRET') ?: '');
 define('ACCESS_CODE', getenv('ACCESS_CODE') ?: '');   // empty = anyone with the link can join
