@@ -1,0 +1,23 @@
+DirectoryIndex index.php
+Options -Indexes
+
+# ── Force HTTPS ──────────────────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ── Block secrets and internal files ─────────────────────────────────────────
+# .env, .htaccess, .git and every other dot-file
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+# bootstrap.php is only included by other PHP files, never opened directly
+<Files "bootstrap.php">
+    Require all denied
+</Files>
+<FilesMatch "\.(env|ini|log|md|sh|sql|bak)$">
+    Require all denied
+</FilesMatch>

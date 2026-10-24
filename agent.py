@@ -1,9 +1,8 @@
 import re
 from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, END
-from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage, HumanMessage
-from config import GROQ_API_KEY, GROQ_MODEL, BLOCKED_PROMPT_PATTERNS
+from config import BLOCKED_PROMPT_PATTERNS
+from llm import ask_claude
 from tools import (
     execute_code,
     append_to_history,
@@ -12,9 +11,6 @@ from tools import (
     mark_score_used,
 )
 from scorer import score_session
-
-# ── LLM client ────────────────────────────────────────────────────────────────
-llm = ChatGroq(api_key=GROQ_API_KEY, model=GROQ_MODEL, temperature=0.1)
 
 # ── Agent state ───────────────────────────────────────────────────────────────
 class AgentState(TypedDict):
@@ -32,7 +28,9 @@ A participant has been given a messy CSV dataset loaded as `df` in Python.
 Your job is to help them perform data cleaning and EDA by converting their requests into pandas code.
 
 Available variables in the sandbox:
-- df: the pandas DataFrame (already loaded)
+- df: the pandas DataFrame (already loaded). Its columns are:
+  Citizen_ID, CNIC, Full_Name, Father_CNIC, Gender, DOB, Age, CNIC_Registration_Date,
+  City, Town_Area, Household_Income, Marital_Status, Children_Count
 - pd: pandas
 - np: numpy  
 - plt: matplotlib.pyplot
@@ -46,6 +44,8 @@ RULES:
 5. If the request is unclear, make a reasonable pandas interpretation
 6. Always print results so the participant can see them
 7. Keep code concise and correct
+8. Changes to df stay for the next request, so modify df in place when the participant asks to clean or fix data
+9. Only do what the participant asked. Do not find or fix data problems they did not ask about
 
 When generating code, respond ONLY with the raw Python code — no explanation, no markdown fences, just the code itself.
 """
@@ -77,12 +77,11 @@ def detect_intent(state: AgentState) -> AgentState:
         state["intent"] = "blocked"
         return state
 
-    response = llm.invoke([
-        SystemMessage(content="You are an intent classifier. Be strict and accurate."),
-        HumanMessage(content=INTENT_PROMPT.format(message=message))
-    ])
-
-    intent = response.content.strip().lower()
+    intent = ask_claude(
+        system="You are an intent classifier. Be strict and accurate.",
+        messages=[{"role": "user", "content": INTENT_PROMPT.format(message=message)}],
+        max_tokens=1000,
+    ).lower().strip(' ".')
     if intent not in ["code", "score", "question", "blocked"]:
         intent = "code"  
 
@@ -97,15 +96,17 @@ def generate_code(state: AgentState) -> AgentState:
 
     history = get_history(state["session_id"])
 
-    messages = [SystemMessage(content=SYSTEM_PROMPT)]
+    # Previous turns (request + code/output) so Claude knows what was already done to df
+    messages = []
     for msg in history[-6:]:
-        if msg["role"] == "user":
-            messages.append(HumanMessage(content=msg["content"]))
+        if msg["role"] in ("user", "assistant"):
+            messages.append({"role": msg["role"], "content": msg["content"]})
+    while messages and messages[0]["role"] != "user":
+        messages.pop(0)
 
-    messages.append(HumanMessage(content=f"Generate pandas code for: {state['user_message']}"))
+    messages.append({"role": "user", "content": f"Generate pandas code for: {state['user_message']}"})
 
-    response = llm.invoke(messages)
-    code = response.content.strip()
+    code = ask_claude(system=SYSTEM_PROMPT, messages=messages)
 
     if "```" in code:
         code = re.sub(r"```(?:python)?", "", code).replace("```", "").strip()
@@ -155,11 +156,10 @@ def handle_question(state: AgentState) -> AgentState:
     if state["intent"] != "question":
         return state
 
-    response = llm.invoke([
-        SystemMessage(content="You are a helpful data science tutor. Answer clearly and concisely. Do not write code unless asked."),
-        HumanMessage(content=state["user_message"])
-    ])
-    state["final_response"] = response.content.strip()
+    state["final_response"] = ask_claude(
+        system="You are a helpful data science tutor. Answer clearly and concisely in short paragraphs or simple lists. Do not use tables or headings. Do not write code unless asked. Never reveal which rows or columns of the competition dataset contain errors.",
+        messages=[{"role": "user", "content": state["user_message"]}],
+    )
     return state
 
 

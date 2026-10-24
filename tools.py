@@ -1,3 +1,4 @@
+import re
 import os
 import json
 import redis
@@ -7,6 +8,7 @@ from config import (
     REDIS_URL,
     SANDBOX_TIMEOUT,
     SANDBOX_IDLE_TTL,
+    SANDBOX_LIFETIME,
     SESSION_TTL,
     CSV_PATH,
     BLOCKED_CODE_PATTERNS,
@@ -17,7 +19,15 @@ from config import (
 os.environ["E2B_API_KEY"] = E2B_API_KEY
 
 # ── Redis client ──────────────────────────────────────────────────────────────
-r = redis.from_url(REDIS_URL, decode_responses=True)
+def make_redis(url: str):
+    """REDIS_URL=memory:// keeps everything in memory (local testing without Redis)."""
+    if url.startswith("memory://"):
+        import fakeredis
+        return fakeredis.FakeRedis(decode_responses=True)
+    return redis.from_url(url, decode_responses=True)
+
+
+r = make_redis(REDIS_URL)
 
 
 # ── Safety check ─────────────────────────────────────────────────────────────
@@ -39,7 +49,8 @@ def create_sandbox(session_id: str) -> str:
     Spin up a new E2B sandbox, preload the CSV as `df`, and store sandbox ID in Redis.
     Returns the sandbox ID.
     """
-    sbx = Sandbox.create()
+    # E2B deletes a sandbox after 5 minutes by default, so keep it alive for the whole session
+    sbx = Sandbox.create(timeout=SANDBOX_LIFETIME)
 
     # Upload the CSV into the sandbox
     with open(CSV_PATH, "rb") as f:
@@ -146,12 +157,13 @@ except Exception:
         full_output = ""
         image_base64 = None
 
-        for log in result.logs.stdout:
-            if "__PLOT__" in log:
-                # Extract base64 image
-                image_base64 = log.split("__PLOT__")[1]
-            else:
-                full_output += log + "\n"
+        # stdout can arrive in chunks that mix printed text with the plot marker,
+        # so join it first, then cut the base64 image out and keep the rest
+        full_output = "".join(result.logs.stdout)
+        plot = re.search(r"__PLOT__(.*?)__PLOT__", full_output, flags=re.S)
+        if plot:
+            image_base64 = plot.group(1).strip()
+            full_output = full_output[:plot.start()] + full_output[plot.end():]
 
         error_output = "".join(result.logs.stderr) if result.logs.stderr else None
 

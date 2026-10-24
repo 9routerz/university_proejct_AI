@@ -1,8 +1,5 @@
-from groq import Groq
-from config import GROQ_API_KEY, GROQ_MODEL
+from llm import ask_claude
 from tools import get_history, get_session_meta
-
-client = Groq(api_key=GROQ_API_KEY)
 
 
 def score_session(session_id: str) -> dict:
@@ -75,13 +72,10 @@ Respond ONLY in this exact JSON format, nothing else:
 }}
 """
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
+    raw = ask_claude(
+        system="You are a strict but fair judge. Reply only with the JSON asked for.",
         messages=[{"role": "user", "content": scoring_prompt}],
-        temperature=0.2,  # low temp for consistent scoring
     )
-
-    raw = response.choices[0].message.content.strip()
 
     # Parse JSON response safely
     try:

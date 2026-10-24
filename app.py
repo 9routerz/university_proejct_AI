@@ -4,6 +4,7 @@ import base64
 
 # ── Config ────────────────────────────────────────────────────────────────────
 API_URL = st.secrets.get("API_URL", "http://127.0.0.1:8000").rstrip("/")
+HEADERS = {"X-Backend-Secret": st.secrets.get("BACKEND_SECRET", "")}
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -246,19 +247,19 @@ for k, v in defaults.items():
 
 # ── API helpers ───────────────────────────────────────────────────────────────
 def api_start(name):
-    r = requests.post(f"{API_URL}/start", json={"participant_name": name})
+    r = requests.post(f"{API_URL}/start", json={"participant_name": name}, headers=HEADERS)
     return r.json()
 
 def api_chat(session_id, message):
-    r = requests.post(f"{API_URL}/chat", json={"session_id": session_id, "message": message})
+    r = requests.post(f"{API_URL}/chat", json={"session_id": session_id, "message": message}, headers=HEADERS)
     return r.json()
 
 def api_score(session_id):
-    r = requests.post(f"{API_URL}/score/{session_id}")
+    r = requests.post(f"{API_URL}/score/{session_id}", headers=HEADERS)
     return r.json()
 
 def api_status(session_id):
-    r = requests.get(f"{API_URL}/status/{session_id}")
+    r = requests.get(f"{API_URL}/status/{session_id}", headers=HEADERS)
     return r.json()
 
 def format_time(seconds):

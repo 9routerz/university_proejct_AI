@@ -1,16 +1,15 @@
-# LLM
-groq
+# LLM (Claude via 9router)
+anthropic
 
 # Agent
 langgraph
-langchain-groq
-langchain-core
 
 # Sandbox
 e2b-code-interpreter
 
 # Session store
 redis
+fakeredis   # only used when REDIS_URL=memory:// (local testing)
 
 # API
 fastapi
@@ -24,4 +23,3 @@ python-dotenv
 
 # Utilities
 pandas
-uuid

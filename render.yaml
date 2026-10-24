@@ -1,0 +1,37 @@
+# Render Blueprint: creates the FastAPI backend + a Redis (Key Value) store.
+# On Render: New > Blueprint > pick this repo. Then fill the secret env vars it asks for.
+services:
+  - type: web
+    name: ds-competition-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: CLAUDE_API_KEY
+        sync: false
+      - key: CLAUDE_BASE_URL
+        sync: false
+      - key: CLAUDE_MODEL
+        sync: false
+      - key: E2B_API_KEY
+        sync: false
+      - key: BACKEND_SECRET
+        generateValue: true     # copy this value into php-frontend/.env on Hostinger
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: CSV_PATH
+        value: data/messy_dataset.csv
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: ds-competition-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: ds-competition-redis
+    plan: free
+    ipAllowList: []   # only reachable from your Render services
