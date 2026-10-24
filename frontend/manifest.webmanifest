@@ -1,0 +1,19 @@
+{
+  "name": "AU DS Competition - AI Data Agent",
+  "short_name": "AU DS AI",
+  "description": "Clean and analyse data by chatting with an AI agent. Air University Karachi.",
+  "start_url": "index.php",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f7fb",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Access AI Agent", "url": "agent.php", "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Guide & Rules", "url": "guide.php" }
+  ]
+}

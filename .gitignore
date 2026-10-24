@@ -22,3 +22,4 @@ venv/
 # Frontend settings with secrets
 frontend/config.local.php
 DP.jpg
+*.zip

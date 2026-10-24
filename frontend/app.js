@@ -224,16 +224,42 @@ $('chat-form').addEventListener('submit', async (e) => {
   }
 });
 
-// Enter sends, Shift+Enter makes a new line; the box grows with the text
+// On a computer Enter sends and Shift+Enter makes a new line.
+// On a touch screen Enter makes a new line and the Send button sends (no accidental sends).
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+if (isTouch) {
+  $('message').setAttribute('enterkeyhint', 'enter');
+  const hint = document.querySelector('.composer-hint');
+  if (hint) hint.textContent = 'Tap Send to send';
+}
+
+// The box grows with the text
 function autosize() {
   const t = $('message');
-  t.style.height = '52px';
+  t.style.height = '50px';
   t.style.height = Math.min(t.scrollHeight, 160) + 'px';
 }
 $('message').addEventListener('input', autosize);
 $('message').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chat-form').requestSubmit(); }
+  if (e.key === 'Enter' && !e.shiftKey && !isTouch) { e.preventDefault(); $('chat-form').requestSubmit(); }
 });
+
+// Jump-to-latest button appears when you scroll up through older messages
+const messagesBox = $('messages');
+const nearBottom = () => messagesBox.scrollHeight - messagesBox.scrollTop - messagesBox.clientHeight < 120;
+messagesBox.addEventListener('scroll', () => $('scroll-down').classList.toggle('hidden', nearBottom()), { passive: true });
+$('scroll-down').addEventListener('click', () => {
+  messagesBox.scrollTo({ top: messagesBox.scrollHeight, behavior: 'smooth' });
+});
+
+// When the phone keyboard opens, keep the latest message in view
+if (window.visualViewport) {
+  let wasNearBottom = true;
+  messagesBox.addEventListener('scroll', () => { wasNearBottom = nearBottom(); }, { passive: true });
+  window.visualViewport.addEventListener('resize', () => {
+    if (wasNearBottom) messagesBox.scrollTop = messagesBox.scrollHeight;
+  });
+}
 
 // Copy button on code cards
 $('messages').addEventListener('click', async (e) => {
@@ -245,13 +271,15 @@ $('messages').addEventListener('click', async (e) => {
   setTimeout(() => { btn.textContent = 'Copy'; }, 1200);
 });
 
-// Quick prompts fill the message box
-$('side-chips').addEventListener('click', (e) => {
-  const chip = e.target.closest('.chip');
-  if (!chip) return;
-  $('message').value = chip.textContent;
-  autosize();
-  $('message').focus();
+// Quick prompts (sidebar on computers, a swipeable row on phones) fill the message box
+['side-chips', 'mobile-chips'].forEach((id) => {
+  $(id).addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    $('message').value = chip.textContent;
+    autosize();
+    $('message').focus();
+  });
 });
 
 $('score-btn').addEventListener('click', async () => {
@@ -270,7 +298,7 @@ $('score-btn').addEventListener('click', async () => {
   } catch (err) {
     addMessage('assistant', '⚠️ ' + err.message);
     btn.disabled = false;
-    btn.textContent = 'Get my score';
+    btn.innerHTML = '<span class="long">Get my score</span><span class="short">Score</span>';
   }
 });
 

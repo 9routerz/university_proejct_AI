@@ -70,12 +70,22 @@ page_header('AI Agent', 'agent.php', 'agent-page');
       <div class="chat-stats">
         <span class="stat actions">Actions <b id="actions">0</b></span>
         <span class="stat">Time <b class="timer" id="timer">--:--</b></span>
-        <button class="btn btn-ok btn-sm" id="score-btn" type="button">Get my score</button>
+        <button class="btn btn-ok btn-sm" id="score-btn" type="button"><span class="long">Get my score</span><span class="short">Score</span></button>
       </div>
     </div>
     <div class="timer-bar"><div id="timer-bar"></div></div>
     <div id="messages" aria-live="polite"></div>
+    <button class="scroll-down hidden" id="scroll-down" type="button" aria-label="Jump to the latest message">↓</button>
     <form class="composer" id="chat-form">
+      <!-- Quick prompts for phones and tablets (the sidebar is hidden there) -->
+      <div class="mobile-chips" id="mobile-chips" aria-label="Quick prompts">
+        <button class="chip" type="button">show the first 10 rows</button>
+        <button class="chip" type="button">give me summary statistics</button>
+        <button class="chip" type="button">missing values per column</button>
+        <button class="chip" type="button">how many duplicate rows?</button>
+        <button class="chip" type="button">unique values of City</button>
+        <button class="chip" type="button">plot a histogram of Age</button>
+      </div>
       <div class="composer-tools">
         <label for="model-select"><?= str_replace('<svg', '<svg width="16" height="16"', icon('spark')) ?> AI model</label>
         <select id="model-select" class="model-select" aria-label="Choose the AI model">

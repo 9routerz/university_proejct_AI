@@ -2,11 +2,21 @@
 const toggle = document.getElementById('nav-toggle');
 const links = document.getElementById('nav-links');
 if (toggle && links) {
-  toggle.addEventListener('click', () => {
-    const open = links.classList.toggle('open');
+  const setMenu = (open) => {
+    links.classList.toggle('open', open);
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.body.classList.toggle('menu-open', open);
+  };
+  toggle.addEventListener('click', () => setMenu(!links.classList.contains('open')));
+  // Close when a link is tapped, when tapping outside, on Escape, or when the screen gets wide
+  links.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
+  document.addEventListener('click', (e) => {
+    if (links.classList.contains('open') && !links.contains(e.target) && !toggle.contains(e.target)) setMenu(false);
   });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+  window.matchMedia('(min-width: 881px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
 }
 
 // Guide page: click a prompt chip to copy it

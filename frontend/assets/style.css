@@ -452,3 +452,105 @@ body.agent-page > section { flex: 1; min-height: 0; }
 }
 .model-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 @media (max-width: 600px) { .model-note { display: none; } }
+
+/* ── Phones & touch ─────────────────────────────────────────────────────── */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+a, button, select, .chip { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.btn:active, .chip:active { transform: scale(.97); }
+
+/* Respect the notch / home bar on modern phones */
+.nav-inner { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+.composer { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+.mini-footer { padding-bottom: max(7px, env(safe-area-inset-bottom)); }
+
+/* Score button: full label on wide screens, short on phones */
+#score-btn .short { display: none; }
+
+/* Quick prompts row above the message box (phones and tablets only) */
+.mobile-chips {
+  display: none; max-width: 920px; margin: 0 auto 10px; gap: 8px; overflow-x: auto; padding-bottom: 2px;
+  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.mobile-chips::-webkit-scrollbar { display: none; }
+.mobile-chips .chip { flex: none; scroll-snap-align: start; font-size: 13.5px; padding: 8px 13px; white-space: nowrap; }
+@media (max-width: 1079px) { .mobile-chips { display: flex; } }
+
+/* Jump-to-latest button */
+.chat-main { position: relative; }
+.scroll-down {
+  position: absolute; right: 18px; bottom: 150px; z-index: 5; width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--border); background: #fff; color: var(--blue); font-size: 20px; font-weight: 700;
+  box-shadow: var(--shadow); cursor: pointer;
+}
+
+/* Open menu: dim the page and stop it scrolling behind */
+body.menu-open { overflow: hidden; }
+body.menu-open::after { content: ""; position: fixed; inset: var(--nav-h) 0 0 0; background: rgba(15, 23, 42, .35); z-index: 40; }
+
+@media (max-width: 768px) {
+  /* 16px stops iPhones zooming in when a field is tapped */
+  input, textarea, select, .input, .model-select { font-size: 16px !important; }
+
+  /* Bigger tap targets */
+  .footer-grid a:not(.brand) { padding: 7px 0; margin-bottom: 2px; }
+  .footer-bottom a, .mini-footer a { display: inline-block; padding: 6px 0; }
+  .nav-links a:not(.btn) { padding: 14px 12px; font-size: 16px; }
+  .nav-links .btn { padding: 15px; font-size: 16px; }
+
+  /* Tighter spacing so more fits on screen */
+  .section { padding: 48px 0; }
+  .hero { padding: 36px 0 28px; }
+  .hero h1 { margin-bottom: 14px; }
+  .hero-cta .btn { flex: 1 1 100%; }
+  .hero-meta { gap: 18px; justify-content: space-between; }
+  .terminal-body { min-height: 210px; font-size: 12.5px; padding: 16px; }
+  .page-hero { padding: 40px 0 22px; }
+  .card { padding: 20px; }
+  .cta-band { padding: 40px 20px; }
+  .cta-band .hero-cta .btn { flex: 1 1 100%; }
+  .novatix-card { padding: 22px; }
+  .novatix-card .btn { width: 100%; }
+  .project-body { padding: 22px; }
+  .project-preview { padding: 20px; }
+  .about-card, .edu-card { padding: 22px; }
+  .stat-strip strong { font-size: 28px; }
+  .stat-strip div { padding: 18px 10px; }
+  .profile-intro .hero-cta .btn { flex: 1 1 100%; }
+
+  /* Join screen: the form comes first so you can start right away */
+  .join-wrap { place-items: start center; padding: 16px 12px; }
+  .join-form { order: -1; padding: 22px 18px; }
+  .join-side { padding: 20px 18px; }
+  .join-side h2 { font-size: 20px; }
+  .join-side .check-list { gap: 8px; font-size: 14.5px; }
+
+  /* Chat */
+  .chat-top { padding: 8px 12px; gap: 8px; }
+  .chat-who small { font-size: 11px; }
+  .avatar { width: 32px; height: 32px; font-size: 13px; }
+  #score-btn .long { display: none; }
+  #score-btn .short { display: inline; }
+  #messages { padding: 16px 10px; }
+  .msg { gap: 8px; margin-bottom: 14px; }
+  .msg .who { width: 28px; height: 28px; font-size: 11px; }
+  .msg .bubble { padding: 12px; font-size: 15px; }
+  .block pre { font-size: 12px; padding: 10px 12px; }
+  .composer { padding: 10px 10px max(10px, env(safe-area-inset-bottom)); }
+  .composer-tools { margin-bottom: 8px; }
+  .composer .btn { width: 50px; padding: 0; }
+  .scroll-down { right: 12px; bottom: 170px; }
+  .score-card { padding: 28px 18px; }
+}
+
+@media (max-width: 380px) {
+  .brand-text { font-size: 15px; }
+  .chat-stats .stat { padding: 5px 9px; }
+  .hero-meta strong { font-size: 22px; }
+}
+
+/* Phone turned sideways: give the messages more room */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-chips, .composer-tools .model-note { display: none !important; }
+  .chat-top { padding: 6px 12px; }
+  #messages { padding: 10px; }
+}

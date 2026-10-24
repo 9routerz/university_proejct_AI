@@ -43,7 +43,15 @@ function page_header($title, $active, $bodyClass = '') {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d4ed8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AU DS AI">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
 <meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf']) ?>">
 <meta name="description" content="AI-powered data science competition at Air University Karachi. Clean and analyse data by chatting with an AI agent.">
 <title><?= $t ?> · <?= SITE_NAME ?></title>
@@ -51,7 +59,7 @@ function page_header($title, $active, $bodyClass = '') {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f5b83d'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' font-family='Arial' font-weight='700' fill='%230a1020'%3EAI%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d4ed8'/%3E%3Ctext x='16' y='22' font-size='15' text-anchor='middle' font-family='Arial' font-weight='700' fill='%23ffffff'%3EAI%3C/text%3E%3C/svg%3E">
 </head>
 <body class="<?= htmlspecialchars($bodyClass) ?>">
 <header class="nav">

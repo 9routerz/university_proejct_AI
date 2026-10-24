@@ -1,5 +1,6 @@
 DirectoryIndex index.php
 Options -Indexes
+AddType application/manifest+json .webmanifest
 
 # ── Force HTTPS ──────────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
