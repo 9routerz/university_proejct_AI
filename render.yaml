@@ -20,7 +20,7 @@ services:
       - key: CLAUDE_MODEL_FAST
         value: cc/claude-haiku-4-5-20251001
       - key: CLAUDE_MODEL_CODE
-        value: cc/claude-opus-5-5
+        value: cc/claude-sonnet-5-5
       - key: CLAUDE_MODEL_CHAT
         value: cc/claude-sonnet-5-5
       - key: CLAUDE_MODEL_JUDGE

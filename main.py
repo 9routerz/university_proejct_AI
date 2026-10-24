@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from config import (
     validate_config, COMPETITION_TIME_LIMIT, SESSION_TTL,
     BACKEND_SECRET, ADMIN_KEY, CORS_ORIGINS, SHOW_DOCS,
+    SELECTABLE_MODELS, CLAUDE_MODEL_CODE,
 )
 from tools import r, create_sandbox, kill_sandbox, get_session_meta
 from agent import run_agent
@@ -66,6 +67,7 @@ class StartResponse(BaseModel):
 class ChatRequest(BaseModel):
     session_id: str = Field(max_length=64)
     message: str = Field(min_length=1, max_length=2000)
+    model: str = Field(default="", max_length=100)   # empty = default model
 
 
 class ChatResponse(BaseModel):
@@ -73,6 +75,7 @@ class ChatResponse(BaseModel):
     image_base64: str | None
     intent: str
     time_remaining_seconds: int
+    model_used: str = ""
 
 
 class ScoreResponse(BaseModel):
@@ -168,13 +171,16 @@ async def chat(req: ChatRequest):
     validate_session(req.session_id)
 
     try:
-        result = run_agent(req.session_id, req.message)
+        allowed = {m["id"] for m in SELECTABLE_MODELS}
+        model = req.model if req.model in allowed else ""
+        result = run_agent(req.session_id, req.message, model)
 
         return ChatResponse(
             response=result["response"],
             image_base64=result.get("image_base64") or None,
             intent=result.get("intent", "code"),
             time_remaining_seconds=get_time_remaining(req.session_id),
+            model_used=result.get("model_used", ""),
         )
 
     except Exception:
@@ -246,6 +252,14 @@ async def reset_session(session_id: str):
 
     kill_sandbox(session_id)
     return {"message": f"Session {session_id} has been reset successfully."}
+
+
+@app.get("/models", dependencies=[Depends(require_backend_secret)])
+async def list_models():
+    """Models participants can pick in the chat, and which one is the default."""
+    ids = {m["id"] for m in SELECTABLE_MODELS}
+    default = CLAUDE_MODEL_CODE if CLAUDE_MODEL_CODE in ids else SELECTABLE_MODELS[0]["id"]
+    return {"models": SELECTABLE_MODELS, "default": default}
 
 
 @app.get("/health")

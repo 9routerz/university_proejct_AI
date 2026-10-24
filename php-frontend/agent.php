@@ -76,6 +76,13 @@ page_header('AI Agent', 'agent.php', 'agent-page');
     <div class="timer-bar"><div id="timer-bar"></div></div>
     <div id="messages" aria-live="polite"></div>
     <form class="composer" id="chat-form">
+      <div class="composer-tools">
+        <label for="model-select"><?= str_replace('<svg', '<svg width="16" height="16"', icon('spark')) ?> AI model</label>
+        <select id="model-select" class="model-select" aria-label="Choose the AI model">
+          <option value="">Claude Sonnet 5.5 (default)</option>
+        </select>
+        <span class="model-note" id="model-note">Balanced and fast</span>
+      </div>
       <div class="composer-inner">
         <textarea class="input" id="message" placeholder="Tell the agent what to do… e.g. show me the first 5 rows" maxlength="2000" rows="1"></textarea>
         <button id="send-btn" class="btn btn-primary" type="submit" aria-label="Send"><span class="label">Send</span> <?= str_replace('<svg', '<svg width="18" height="18"', icon('send')) ?></button>

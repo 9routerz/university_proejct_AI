@@ -118,11 +118,18 @@ switch ($action) {
         $message = trim((string)($input['message'] ?? ''));
         if ($message === '') reply(400, ['detail' => 'Message is empty.']);
         if (mb_strlen($message) > 2000) reply(400, ['detail' => 'Message is too long (max 2000 characters).']);
+        // The backend only accepts models from its own list; anything else falls back to the default
+        $model = preg_replace('/[^A-Za-z0-9._\/-]/', '', (string)($input['model'] ?? ''));
         rate_limit('chat', 2);
         session_write_close();
 
-        [$status, $data] = backend('POST', '/chat', ['session_id' => $sessionId, 'message' => $message]);
+        [$status, $data] = backend('POST', '/chat', ['session_id' => $sessionId, 'message' => $message, 'model' => substr($model, 0, 100)]);
         if ($status === 404 || $status === 403) save_session(['session_id' => null]);
+        reply($status, $data);
+
+    case 'models':
+        session_write_close();
+        [$status, $data] = backend('GET', '/models');
         reply($status, $data);
 
     case 'status':

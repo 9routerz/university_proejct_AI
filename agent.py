@@ -2,7 +2,7 @@ import re
 from typing import TypedDict, Annotated
 from langgraph.graph import StateGraph, END
 from config import BLOCKED_PROMPT_PATTERNS
-from llm import ask_claude
+from llm import ask_claude, ask_claude_with_model
 from tools import (
     execute_code,
     append_to_history,
@@ -21,6 +21,8 @@ class AgentState(TypedDict):
     execution_result: dict
     final_response: str
     image_base64: str
+    model: str             # model the participant picked (empty = default)
+    model_used: str        # model that actually answered
 
 
 SYSTEM_PROMPT = """You are a data science competition assistant. 
@@ -107,7 +109,9 @@ def generate_code(state: AgentState) -> AgentState:
 
     messages.append({"role": "user", "content": f"Generate pandas code for: {state['user_message']}"})
 
-    code = ask_claude(system=SYSTEM_PROMPT, messages=messages, task="code")
+    code, state["model_used"] = ask_claude_with_model(
+        system=SYSTEM_PROMPT, messages=messages, task="code", model=state.get("model") or None,
+    )
 
     # Keep only the code inside the ```python block; ignore any text around it
     fenced = re.search(r"```(?:python|py)?\s*\n(.*?)```", code, flags=re.S)
@@ -164,10 +168,11 @@ def handle_question(state: AgentState) -> AgentState:
     if state["intent"] != "question":
         return state
 
-    state["final_response"] = ask_claude(
+    state["final_response"], state["model_used"] = ask_claude_with_model(
         system="You are a helpful data science tutor. Answer clearly and concisely in short paragraphs or simple lists. Do not use tables or headings. Do not write code unless asked. Never reveal which rows or columns of the competition dataset contain errors.",
         messages=[{"role": "user", "content": state["user_message"]}],
         task="chat",
+        model=state.get("model") or None,
     )
     return state
 
@@ -260,7 +265,7 @@ def build_agent():
 agent = build_agent()
 
 
-def run_agent(session_id: str, user_message: str) -> dict:
+def run_agent(session_id: str, user_message: str, model: str = "") -> dict:
     """
     Main entry point. Takes session_id and user message, returns response dict.
     """
@@ -272,10 +277,13 @@ def run_agent(session_id: str, user_message: str) -> dict:
         "execution_result": {},
         "final_response": "",
         "image_base64": "",
+        "model": model,
+        "model_used": "",
     })
 
     return {
         "response": result["final_response"],
         "image_base64": result.get("image_base64", ""),
         "intent": result.get("intent", ""),
+        "model_used": result.get("model_used", ""),
     }

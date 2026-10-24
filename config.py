@@ -10,9 +10,23 @@ CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", "cc/claude-opus-5")   # backup m
 
 # Smart routing: each job uses the model that fits it best
 CLAUDE_MODEL_FAST   = os.getenv("CLAUDE_MODEL_FAST", "cc/claude-haiku-4-5-20251001")  # sorts each message (code / question / score / blocked)
-CLAUDE_MODEL_CODE   = os.getenv("CLAUDE_MODEL_CODE", "cc/claude-opus-5-5")            # writes the pandas code
+CLAUDE_MODEL_CODE   = os.getenv("CLAUDE_MODEL_CODE", "cc/claude-sonnet-5-5")          # writes the pandas code (default in the chat model picker)
 CLAUDE_MODEL_CHAT   = os.getenv("CLAUDE_MODEL_CHAT", "cc/claude-sonnet-5-5")          # answers data science questions
 CLAUDE_MODEL_JUDGE  = os.getenv("CLAUDE_MODEL_JUDGE", "cc/claude-opus-5-5")           # scores the session
+
+# Models participants can pick in the chat (used for code and questions).
+# Format: model-id|Label|short description, separated by commas.
+SELECTABLE_MODELS = []
+for item in os.getenv(
+    "SELECTABLE_MODELS",
+    "cc/claude-sonnet-5-5|Claude Sonnet 5.5|Balanced and fast,"
+    "cc/claude-opus-5-5|Claude Opus 5.5|Most powerful,"
+    "cc/claude-opus-5|Claude Opus 5|Powerful,"
+    "cc/claude-haiku-4-5-20251001|Claude Haiku 4.5|Fastest",
+).split(","):
+    parts = [x.strip() for x in item.split("|")]
+    if parts and parts[0]:
+        SELECTABLE_MODELS.append({"id": parts[0], "label": parts[1] if len(parts) > 1 else parts[0], "note": parts[2] if len(parts) > 2 else ""})
 
 # If the chosen model fails or is down, these are tried in order
 CLAUDE_FALLBACK_MODELS = [m.strip() for m in os.getenv(
