@@ -19,8 +19,13 @@ async function api(action, body) {
   return data;
 }
 
+// 'join' = name popup over the chat, 'chat' = chat only, 'result' = score screen
 function show(id) {
-  ['join', 'chat', 'result'].forEach((s) => $(s).classList.toggle('hidden', s !== id));
+  $('join').classList.toggle('hidden', id !== 'join');
+  $('chat').classList.toggle('hidden', id === 'result');
+  $('result').classList.toggle('hidden', id !== 'result');
+  document.body.classList.toggle('modal-open', id === 'join');
+  if (id === 'join') setTimeout(() => $('name').focus(), 50);
 }
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -98,35 +103,25 @@ $('model-select').addEventListener('change', () => {
   try { localStorage.setItem('dscomp-model', $('model-select').value); } catch (e) { /* storage blocked */ }
 });
 
-// ── Suggested questions (shown in the empty chat, gone after the first message) ──
-const SUGGESTIONS = [
-  { group: 'Explore', color: 'blue', items: ['Show the first 10 rows', 'Show the shape and column types', 'Give me summary statistics'] },
-  { group: 'Find problems', color: 'red', items: ['How many missing values are in each column?', 'How many duplicate rows are there?', 'Show the unique values of City'] },
-  { group: 'Visualise', color: 'green', items: ['Plot a histogram of Age', 'Plot the number of people per City'] },
-  { group: 'Learn', color: 'navy', items: ['When should I use median instead of mean?'] },
-];
+// ── Suggestions panel above the message box ─────────────────────────────
+// Opens by itself until you send your first message; the Suggestions button reopens it.
+const SENT_KEY = 'dscomp-sent';
+const hasSent = () => { try { return localStorage.getItem(SENT_KEY) === '1'; } catch (e) { return false; } };
+const markSent = (v) => { try { v ? localStorage.setItem(SENT_KEY, '1') : localStorage.removeItem(SENT_KEY); } catch (e) { /* storage blocked */ } };
 
-function showSuggestions() {
-  if ($('suggestions') || document.querySelector('.msg.user')) return;
-  const box = document.createElement('div');
-  box.id = 'suggestions';
-  box.className = 'suggest';
-  box.innerHTML = '<p class="suggest-title">Not sure where to start? Tap a question:</p>' +
-    SUGGESTIONS.map((g) => '<div class="suggest-group ' + g.color + '"><span>' + g.group + '</span>' +
-      g.items.map((q) => '<button type="button" class="suggest-btn">' + esc(q) + '</button>').join('') + '</div>').join('');
-  $('messages').appendChild(box);
-  $('messages').scrollTop = 0; // start at the welcome message, questions below it
+function setSuggestions(open) {
+  $('suggest-panel').classList.toggle('hidden', !open);
+  $('suggest-toggle').classList.toggle('active', open);
+  $('suggest-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');
 }
-
-function hideSuggestions() {
-  const box = $('suggestions');
-  if (box) box.remove();
-}
+$('suggest-toggle').addEventListener('click', () => setSuggestions($('suggest-panel').classList.contains('hidden')));
+$('suggest-close').addEventListener('click', () => setSuggestions(false));
 
 // Tapping a suggestion sends it straight away
-$('messages').addEventListener('click', (e) => {
+$('suggest-panel').addEventListener('click', (e) => {
   const btn = e.target.closest('.suggest-btn');
   if (!btn || $('send-btn').disabled) return;
+  setSuggestions(false);
   $('message').value = btn.textContent;
   $('chat-form').requestSubmit();
 });
@@ -223,7 +218,8 @@ $('join-form').addEventListener('submit', async (e) => {
     show('chat');
     loadModels();
     addMessage('assistant', data.message);
-    showSuggestions();
+    markSent(false);
+    setSuggestions(true);
     startTimer(data.time_limit_seconds);
     $('message').focus();
   } catch (err) {
@@ -240,7 +236,8 @@ $('chat-form').addEventListener('submit', async (e) => {
   if (!text || $('send-btn').disabled) return;
   $('message').value = '';
   autosize();
-  hideSuggestions();
+  setSuggestions(false);
+  markSent(true);
   addMessage('user', text);
   const pending = addTyping();
   $('send-btn').disabled = true;
@@ -307,7 +304,7 @@ $('messages').addEventListener('click', async (e) => {
 });
 
 // Quick prompts (sidebar on computers, a swipeable row on phones) fill the message box
-['side-chips', 'mobile-chips'].forEach((id) => {
+['side-chips'].forEach((id) => {
   $(id).addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
@@ -337,10 +334,13 @@ $('score-btn').addEventListener('click', async () => {
   }
 });
 
+// No session yet: ask for the name in the popup
+if (!HAS_SESSION) show('join');
+
 // Page reload: resume the running session
 if (HAS_SESSION) {
   refreshStatus().then((ok) => {
-    if (ok) { loadModels(); addMessage('assistant', 'Welcome back! Your session is still running. The dataset is loaded as `df`.'); showSuggestions(); }
+    if (ok) { show('chat'); loadModels(); addMessage('assistant', 'Welcome back! Your session is still running. The dataset is loaded as `df`.'); setSuggestions(!hasSent()); }
     else show('join');
   });
 }

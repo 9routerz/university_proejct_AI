@@ -30,7 +30,9 @@ function icon($name) {
         'briefcase' => '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
         'layers'  => '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',
         'check'   => '<path d="m5 12 5 5 9-10"/>',
-        'arrow'   => '<path d="M5 12h14M13 6l6 6-6 6"/>',
+        'bulb'    => '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/>',
+        'close'   => '<path d="M6 6l12 12M18 6 6 18"/>',
+        'arrow'   =>'<path d="M5 12h14M13 6l6 6-6 6"/>',
         'bolt'    =>'<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>',
     ];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . ($paths[$name] ?? '') . '</svg>';

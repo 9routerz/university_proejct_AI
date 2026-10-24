@@ -23,3 +23,6 @@ venv/
 frontend/config.local.php
 DP.jpg
 *.zip
+
+# FTP login for deploy-frontend.ps1
+deploy.env

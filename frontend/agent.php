@@ -4,45 +4,19 @@ require __DIR__ . '/partials/layout.php';
 $hasSession = !empty($_SESSION['session_id']);
 $name = $_SESSION['name'] ?? '';
 $needsCode = ACCESS_CODE !== '';
+
+// Suggested questions shown above the message box
+$suggestions = [
+    ['Explore', 'blue', ['Show the first 10 rows', 'Show the shape and column types', 'Give me summary statistics']],
+    ['Find problems', 'red', ['How many missing values are in each column?', 'How many duplicate rows are there?', 'Show the unique values of City']],
+    ['Visualise', 'green', ['Plot a histogram of Age', 'Plot the number of people per City']],
+    ['Learn', 'navy', ['When should I use median instead of mean?']],
+];
 page_header('AI Agent', 'agent.php', 'agent-page');
 ?>
 
-<!-- 1. Join -->
-<section id="join" class="join-wrap <?= $hasSession ? 'hidden' : '' ?>">
-  <div class="join-card">
-    <div class="join-side">
-      <span class="eyebrow">AI Data Agent</span>
-      <h2>Your private data lab is <span class="grad-text">one click away</span></h2>
-      <p class="muted">When you begin, we create a secure sandbox with the dataset loaded as <code class="inline-code">df</code>. Then just tell the agent what you want.</p>
-      <ul class="check-list" style="margin-top:20px">
-        <li>60 minutes from the moment you start</li>
-        <li>The agent writes and runs the code for you</li>
-        <li>Charts appear right in the chat</li>
-        <li>One final score at the end</li>
-      </ul>
-      <p style="margin-top:20px;font-size:14px"><a href="guide.php">First time? Read the guide →</a></p>
-    </div>
-    <form class="join-form" id="join-form">
-      <h3>Begin your session</h3>
-      <p class="muted" style="font-size:15px">Use your real name. It appears on your result.</p>
-      <div class="field">
-        <label for="name">Full name</label>
-        <input class="input" id="name" placeholder="e.g. Ayesha Khan" maxlength="60" autocomplete="name" required>
-      </div>
-      <?php if ($needsCode): ?>
-      <div class="field">
-        <label for="code">Access code</label>
-        <input class="input" id="code" type="password" placeholder="Given by the organizers" maxlength="100" autocomplete="off" required>
-      </div>
-      <?php endif; ?>
-      <button id="join-btn" class="btn btn-primary" type="submit" style="width:100%;margin-top:6px">Begin session <span aria-hidden="true">→</span></button>
-      <div id="join-error" class="error" role="alert"></div>
-    </form>
-  </div>
-</section>
-
-<!-- 2. Chat -->
-<section id="chat" class="chat-app <?= $hasSession ? '' : 'hidden' ?>">
+<!-- Chat (always visible; blurred behind the name popup until a session starts) -->
+<section id="chat" class="chat-app">
   <aside class="chat-side">
     <h4>Quick prompts</h4>
     <div class="side-chips" id="side-chips">
@@ -63,7 +37,7 @@ page_header('AI Agent', 'agent.php', 'agent-page');
       <div class="chat-who">
         <span class="avatar" id="avatar"><?= htmlspecialchars(mb_strtoupper(mb_substr($name, 0, 1)) ?: '?') ?></span>
         <div style="min-width:0">
-          <span id="who"><?= htmlspecialchars($name) ?></span>
+          <span id="who"><?= htmlspecialchars($name ?: 'Guest') ?></span>
           <small>● Sandbox connected</small>
         </div>
       </div>
@@ -76,25 +50,38 @@ page_header('AI Agent', 'agent.php', 'agent-page');
     <div class="timer-bar"><div id="timer-bar"></div></div>
     <div id="messages" aria-live="polite"></div>
     <button class="scroll-down hidden" id="scroll-down" type="button" aria-label="Jump to the latest message">↓</button>
+
     <form class="composer" id="chat-form">
-      <!-- Quick prompts for phones and tablets (the sidebar is hidden there) -->
-      <div class="mobile-chips" id="mobile-chips" aria-label="Quick prompts">
-        <button class="chip" type="button">show the first 10 rows</button>
-        <button class="chip" type="button">give me summary statistics</button>
-        <button class="chip" type="button">missing values per column</button>
-        <button class="chip" type="button">how many duplicate rows?</button>
-        <button class="chip" type="button">unique values of City</button>
-        <button class="chip" type="button">plot a histogram of Age</button>
+      <!-- Suggested questions: open on the first visit, reopen with the Suggestions button -->
+      <div class="suggest-panel hidden" id="suggest-panel" aria-label="Suggested questions">
+        <div class="suggest-head">
+          <span><?= str_replace('<svg', '<svg width="16" height="16"', icon('bulb')) ?> Not sure where to start? Tap a question</span>
+          <button type="button" class="suggest-close" id="suggest-close" aria-label="Hide suggestions"><?= str_replace('<svg', '<svg width="16" height="16"', icon('close')) ?></button>
+        </div>
+        <div class="suggest-body">
+          <?php foreach ($suggestions as [$group, $color, $items]): ?>
+            <div class="suggest-group <?= $color ?>">
+              <span class="suggest-label"><?= $group ?></span>
+              <?php foreach ($items as $q): ?>
+                <button type="button" class="suggest-btn"><?= htmlspecialchars($q) ?></button>
+              <?php endforeach; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
       </div>
+
       <div class="composer-tools">
-        <label for="model-select"><?= str_replace('<svg', '<svg width="16" height="16"', icon('spark')) ?> AI model</label>
+        <button type="button" class="tool-btn" id="suggest-toggle" aria-expanded="false" aria-controls="suggest-panel">
+          <?= str_replace('<svg', '<svg width="16" height="16"', icon('bulb')) ?> <span>Suggestions</span>
+        </button>
+        <label for="model-select" class="model-label"><?= str_replace('<svg', '<svg width="16" height="16"', icon('spark')) ?> <span>AI model</span></label>
         <select id="model-select" class="model-select" aria-label="Choose the AI model">
           <option value="">Claude Sonnet 5.5 (default)</option>
         </select>
         <span class="model-note" id="model-note">Balanced and fast</span>
       </div>
       <div class="composer-inner">
-        <textarea class="input" id="message" placeholder="Tell the agent what to do… e.g. show me the first 5 rows" maxlength="2000" rows="1"></textarea>
+        <textarea class="input" id="message" placeholder="Ask the agent… e.g. show me the first 5 rows" maxlength="2000" rows="1"></textarea>
         <button id="send-btn" class="btn btn-primary" type="submit" aria-label="Send"><span class="label">Send</span> <?= str_replace('<svg', '<svg width="18" height="18"', icon('send')) ?></button>
       </div>
       <div class="composer-hint">Enter to send · Shift + Enter for a new line</div>
@@ -102,7 +89,34 @@ page_header('AI Agent', 'agent.php', 'agent-page');
   </div>
 </section>
 
-<!-- 3. Score -->
+<!-- Name popup over the chat -->
+<div id="join" class="modal <?= $hasSession ? 'hidden' : '' ?>" role="dialog" aria-modal="true" aria-labelledby="join-title">
+  <form class="modal-card" id="join-form">
+    <div class="modal-icon"><?= str_replace('<svg', '<svg width="26" height="26"', icon('spark')) ?></div>
+    <h2 id="join-title">Start your AI session</h2>
+    <p class="muted">Your private sandbox is ready in seconds, with the dataset loaded as <code class="inline-code">df</code>.</p>
+    <div class="field">
+      <label for="name">Your full name</label>
+      <input class="input" id="name" placeholder="e.g. Ayesha Khan" maxlength="60" autocomplete="name" required>
+    </div>
+    <?php if ($needsCode): ?>
+    <div class="field">
+      <label for="code">Access code</label>
+      <input class="input" id="code" type="password" placeholder="Given by the organizers" maxlength="100" autocomplete="off" required>
+    </div>
+    <?php endif; ?>
+    <button id="join-btn" class="btn btn-primary" type="submit">Begin session <span aria-hidden="true">→</span></button>
+    <div id="join-error" class="error" role="alert"></div>
+    <div class="modal-facts">
+      <span><?= str_replace('<svg', '<svg width="15" height="15"', icon('clock')) ?> 60 minutes</span>
+      <span><?= str_replace('<svg', '<svg width="15" height="15"', icon('shield')) ?> Private sandbox</span>
+      <span><?= str_replace('<svg', '<svg width="15" height="15"', icon('trophy')) ?> One score</span>
+    </div>
+    <p class="modal-links"><a href="guide.php">Read the guide</a> · <a href="index.php">Back to home</a></p>
+  </form>
+</div>
+
+<!-- Score -->
 <section id="result" class="join-wrap hidden">
   <div class="score-card">
     <span class="eyebrow">Session complete</span>
