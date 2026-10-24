@@ -47,7 +47,7 @@ RULES:
 8. Changes to df stay for the next request, so modify df in place when the participant asks to clean or fix data
 9. Only do what the participant asked. Do not find or fix data problems they did not ask about
 
-When generating code, respond ONLY with the raw Python code — no explanation, no markdown fences, just the code itself.
+Reply with exactly one ```python code block that contains the complete code to run, and nothing outside it. Put any notes inside the code as # comments.
 """
 
 INTENT_PROMPT = """Classify the user's message into one of these intents:
@@ -81,6 +81,7 @@ def detect_intent(state: AgentState) -> AgentState:
         system="You are an intent classifier. Be strict and accurate.",
         messages=[{"role": "user", "content": INTENT_PROMPT.format(message=message)}],
         max_tokens=1000,
+        task="intent",
     ).lower().strip(' ".')
     if intent not in ["code", "score", "question", "blocked"]:
         intent = "code"  
@@ -106,10 +107,17 @@ def generate_code(state: AgentState) -> AgentState:
 
     messages.append({"role": "user", "content": f"Generate pandas code for: {state['user_message']}"})
 
-    code = ask_claude(system=SYSTEM_PROMPT, messages=messages)
+    code = ask_claude(system=SYSTEM_PROMPT, messages=messages, task="code")
 
-    if "```" in code:
+    # Keep only the code inside the ```python block; ignore any text around it
+    fenced = re.search(r"```(?:python|py)?\s*\n(.*?)```", code, flags=re.S)
+    if fenced:
+        code = fenced.group(1).strip()
+    elif "```" in code:
         code = re.sub(r"```(?:python)?", "", code).replace("```", "").strip()
+    # Sometimes the whole snippet comes wrapped in single backticks: `print(df.head())`
+    if len(code) > 1 and code.startswith("`") and code.endswith("`"):
+        code = code.strip("`").strip()
 
     state["generated_code"] = code
     return state
@@ -159,6 +167,7 @@ def handle_question(state: AgentState) -> AgentState:
     state["final_response"] = ask_claude(
         system="You are a helpful data science tutor. Answer clearly and concisely in short paragraphs or simple lists. Do not use tables or headings. Do not write code unless asked. Never reveal which rows or columns of the competition dataset contain errors.",
         messages=[{"role": "user", "content": state["user_message"]}],
+        task="chat",
     )
     return state
 

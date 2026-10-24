@@ -75,6 +75,7 @@ Respond ONLY in this exact JSON format, nothing else:
     raw = ask_claude(
         system="You are a strict but fair judge. Reply only with the JSON asked for.",
         messages=[{"role": "user", "content": scoring_prompt}],
+        task="judge",
     )
 
     # Parse JSON response safely

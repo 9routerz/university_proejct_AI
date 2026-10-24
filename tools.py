@@ -65,6 +65,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io, base64, warnings
 warnings.filterwarnings('ignore')
+pd.set_option('display.width', 250)
+pd.set_option('display.max_columns', 50)
 
 df = pd.read_csv('/home/user/dataset.csv')
 print(f"Dataset loaded: {df.shape[0]} rows, {df.shape[1]} columns")
@@ -166,6 +168,9 @@ except Exception:
             full_output = full_output[:plot.start()] + full_output[plot.end():]
 
         error_output = "".join(result.logs.stderr) if result.logs.stderr else None
+        # Python exceptions (SyntaxError, KeyError, ...) are reported in result.error, not stderr
+        if result.error:
+            error_output = f"{result.error.name}: {result.error.value}"
 
         # Increment action count in Redis
         r.hincrby(f"session:{session_id}", "action_count", 1)

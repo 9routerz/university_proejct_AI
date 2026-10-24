@@ -6,7 +6,18 @@ load_dotenv()
 # ── LLM ───────────────────────────────────────────────────────────────────────
 CLAUDE_API_KEY      = os.getenv("CLAUDE_API_KEY")                     # your 9router key
 CLAUDE_BASE_URL     = os.getenv("CLAUDE_BASE_URL")                    # your 9router URL, e.g. https://xxx.up.railway.app
-CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", "claude-opus-5-5")    # model name exactly as 9router lists it
+CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", "cc/claude-opus-5")   # backup model (names exactly as 9router lists them)
+
+# Smart routing: each job uses the model that fits it best
+CLAUDE_MODEL_FAST   = os.getenv("CLAUDE_MODEL_FAST", "cc/claude-haiku-4-5-20251001")  # sorts each message (code / question / score / blocked)
+CLAUDE_MODEL_CODE   = os.getenv("CLAUDE_MODEL_CODE", "cc/claude-opus-5-5")            # writes the pandas code
+CLAUDE_MODEL_CHAT   = os.getenv("CLAUDE_MODEL_CHAT", "cc/claude-sonnet-5-5")          # answers data science questions
+CLAUDE_MODEL_JUDGE  = os.getenv("CLAUDE_MODEL_JUDGE", "cc/claude-opus-5-5")           # scores the session
+
+# If the chosen model fails or is down, these are tried in order
+CLAUDE_FALLBACK_MODELS = [m.strip() for m in os.getenv(
+    "CLAUDE_FALLBACK_MODELS", "cc/claude-opus-5-5,cc/claude-sonnet-5-5,cc/claude-opus-5"
+).split(",") if m.strip()]
 
 # ── E2B ───────────────────────────────────────────────────────────────────────
 E2B_API_KEY         = os.getenv("E2B_API_KEY")

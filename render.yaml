@@ -16,7 +16,17 @@ services:
       - key: CLAUDE_BASE_URL
         sync: false
       - key: CLAUDE_MODEL
-        sync: false
+        value: cc/claude-opus-5
+      - key: CLAUDE_MODEL_FAST
+        value: cc/claude-haiku-4-5-20251001
+      - key: CLAUDE_MODEL_CODE
+        value: cc/claude-opus-5-5
+      - key: CLAUDE_MODEL_CHAT
+        value: cc/claude-sonnet-5-5
+      - key: CLAUDE_MODEL_JUDGE
+        value: cc/claude-opus-5-5
+      - key: CLAUDE_FALLBACK_MODELS
+        value: cc/claude-opus-5-5,cc/claude-sonnet-5-5,cc/claude-opus-5
       - key: E2B_API_KEY
         sync: false
       - key: BACKEND_SECRET

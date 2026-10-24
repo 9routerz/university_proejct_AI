@@ -1,0 +1,2 @@
+# Only included by other PHP files, never served directly
+Require all denied

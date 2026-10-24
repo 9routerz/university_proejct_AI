@@ -15,6 +15,8 @@ from agent import run_agent
 # ── Validate env on startup ───────────────────────────────────────────────────
 validate_config()
 
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s - %(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 log = logging.getLogger("ds-api")
 
 # ── App ───────────────────────────────────────────────────────────────────────

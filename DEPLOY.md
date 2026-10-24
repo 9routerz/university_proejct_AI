@@ -44,7 +44,8 @@ Never commit the clean reference / answer-key CSV to a public repo.
    Upload it to the folder **above** `public_html` as `ds-competition.env` (safest: the web can't reach it).
    If you can't, upload it as `.env` next to `index.php`; `.htaccess` blocks it from the web.
 2. In Hostinger hPanel > **File Manager**, open `public_html` (or a subfolder) and upload
-   `index.php`, `api.php`, `app.js`, `bootstrap.php` and `.htaccess` from `php-frontend/`.
+   everything inside `php-frontend/`: the `.php` pages (`index`, `about`, `guide`, `developer`, `agent`, `api`,
+   `bootstrap`), `app.js`, `.htaccess`, and the `assets/` and `partials/` folders.
 3. Turn on SSL for the domain in hPanel. `.htaccess` then forces HTTPS.
 4. Open your domain. Enter a name, click **Begin session** and chat.
 

@@ -1,122 +1,83 @@
 <?php
 require __DIR__ . '/bootstrap.php';
-$hasSession = !empty($_SESSION['session_id']);
-$name = $_SESSION['name'] ?? '';
-$needsCode = ACCESS_CODE !== '';
+require __DIR__ . '/partials/layout.php';
+page_header('Home', 'index.php');
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf']) ?>">
-<title>DS Competition</title>
-<style>
-  :root {
-    --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3;
-    --muted: #8b949e; --accent: #2f81f7; --accent-2: #1f6feb; --ok: #3fb950;
-    --warn: #d29922; --danger: #f85149; --code: #0b0f14;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .hidden { display: none !important; }
-  button { font: inherit; cursor: pointer; border: 0; border-radius: 8px;
-           background: var(--accent-2); color: #fff; padding: 10px 18px; font-weight: 600; }
-  button:hover { background: var(--accent); }
-  button:disabled { opacity: .5; cursor: wait; }
-  input, textarea { font: inherit; color: var(--text); background: var(--bg);
-                    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; width: 100%; }
-  input:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
-
-  /* Join screen */
-  .center { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
-          padding: 28px; width: 100%; max-width: 440px; }
-  .card h1 { margin: 0 0 6px; font-size: 24px; }
-  .card p { margin: 0 0 20px; color: var(--muted); }
-  .card button { width: 100%; margin-top: 12px; }
-  .error { color: var(--danger); margin-top: 10px; min-height: 1.5em; }
-
-  /* Chat screen */
-  .app { display: flex; flex-direction: column; height: 100vh; }
-  header { display: flex; gap: 16px; align-items: center; justify-content: space-between;
-           padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--panel); flex-wrap: wrap; }
-  header .who { font-weight: 600; }
-  header .stats { display: flex; gap: 16px; color: var(--muted); align-items: center; flex-wrap: wrap; }
-  .timer { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 700; }
-  .timer.low { color: var(--danger); }
-  #messages { flex: 1; overflow-y: auto; padding: 16px; }
-  .msg { max-width: 860px; margin: 0 auto 14px; padding: 12px 14px; border-radius: 12px;
-         border: 1px solid var(--border); overflow-wrap: anywhere; }
-  .msg.user { background: #1c2a3f; border-color: #24406b; }
-  .msg.assistant { background: var(--panel); }
-  .msg .role { font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
-  .msg pre { background: var(--code); border: 1px solid var(--border); border-radius: 8px;
-             padding: 10px; overflow-x: auto; font-size: 13px; margin: 8px 0; }
-  .msg code { font-family: ui-monospace, Consolas, monospace; }
-  .msg img { max-width: 100%; border-radius: 8px; margin-top: 8px; background: #fff; }
-  .typing { color: var(--muted); font-style: italic; }
-  form#chat-form { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); background: var(--panel); }
-  form#chat-form textarea { resize: none; height: 46px; }
-  .score-btn { background: var(--ok); color: #04210c; }
-  .score-btn:hover { background: #56d364; }
-
-  /* Score screen */
-  .big-score { font-size: 64px; font-weight: 800; margin: 8px 0; color: var(--ok); }
-  .score-box { text-align: left; background: var(--bg); border: 1px solid var(--border);
-               border-radius: 10px; padding: 12px; margin-top: 12px; white-space: pre-wrap; }
-
-  @media (max-width: 600px) {
-    form#chat-form { flex-direction: column; }
-  }
-</style>
-</head>
-<body>
-
-<!-- 1. Join -->
-<section id="join" class="center <?= $hasSession ? 'hidden' : '' ?>">
-  <div class="card">
-    <h1>Data Science Competition</h1>
-    <p>Clean and analyse the dataset by chatting with the AI agent. You don't need to write code.</p>
-    <form id="join-form">
-      <input id="name" placeholder="Enter your name" maxlength="60" autocomplete="name" required>
-      <?php if ($needsCode): ?>
-      <input id="code" type="password" placeholder="Access code" maxlength="100" autocomplete="off" required style="margin-top:10px">
-      <?php endif; ?>
-      <button id="join-btn" type="submit">Begin session</button>
-    </form>
-    <div id="join-error" class="error"></div>
-  </div>
-</section>
-
-<!-- 2. Chat -->
-<section id="chat" class="app <?= $hasSession ? '' : 'hidden' ?>">
-  <header>
-    <div class="who" id="who"><?= htmlspecialchars($name) ?></div>
-    <div class="stats">
-      <span>Actions: <b id="actions">0</b></span>
-      <span>Time left: <span class="timer" id="timer">--:--</span></span>
-      <button class="score-btn" id="score-btn" type="button">Get my score</button>
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="pill"><b>LIVE</b> Data Science Competition · Air University Karachi</span>
+        <h1>Clean data by <span class="grad-text">talking</span>, not typing code.</h1>
+        <p class="lead">
+          Get a messy real-world dataset and an AI agent that writes and runs Python for you.
+          Your job is to think like a data scientist: find the problems, ask the right questions, and fix the data.
+        </p>
+        <div class="hero-cta">
+          <a href="agent.php" class="btn btn-primary">Access AI Agent <span aria-hidden="true">→</span></a>
+          <a href="about.php" class="btn btn-ghost">How it works</a>
+        </div>
+        <div class="hero-meta">
+          <div><strong>5,000+</strong>citizen records</div>
+          <div><strong>60 min</strong>per participant</div>
+          <div><strong>100</strong>points to win</div>
+        </div>
+      </div>
+      <div class="terminal reveal" aria-label="Example conversation with the AI agent">
+        <div class="terminal-bar"><i></i><i></i><i></i><span>ai-agent · sandbox</span></div>
+        <div class="terminal-body" id="hero-terminal"></div>
+      </div>
     </div>
-  </header>
-  <div id="messages"></div>
-  <form id="chat-form">
-    <textarea id="message" placeholder="e.g. show me the first 5 rows" maxlength="2000"></textarea>
-    <button id="send-btn" type="submit">Send</button>
-  </form>
-</section>
+  </section>
 
-<!-- 3. Score -->
-<section id="result" class="center hidden">
-  <div class="card" style="text-align:center; max-width:560px">
-    <h1>Your final score</h1>
-    <div class="big-score" id="score-value">0</div>
-    <div class="score-box" id="score-breakdown"></div>
-    <div class="score-box" id="score-feedback"></div>
-  </div>
-</section>
+  <!-- Features -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Why it's different</span>
+        <h2>A data science contest where your <span class="grad-text">thinking</span> is what counts</h2>
+        <p>Nobody wins by typing faster. You win by spotting what's wrong with the data and knowing how to fix it.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card reveal"><div class="icon"><?= icon('chat') ?></div><h3>Plain-language commands</h3><p>Type "fill missing ages with the median" and the agent turns it into working pandas code.</p></div>
+        <div class="card reveal"><div class="icon red"><?= icon('box') ?></div><h3>Your own private sandbox</h3><p>Every participant gets an isolated cloud computer with the dataset loaded. Nobody else can touch your data.</p></div>
+        <div class="card reveal"><div class="icon green"><?= icon('chart') ?></div><h3>Charts on demand</h3><p>Ask for histograms, bar charts or scatter plots and see them right inside the chat.</p></div>
+        <div class="card reveal"><div class="icon"><?= icon('shield') ?></div><h3>Fair and cheat-proof</h3><p>The agent only does what you ask. Requests to reveal answers or bypass the rules are blocked.</p></div>
+        <div class="card reveal"><div class="icon red"><?= icon('clock') ?></div><h3>Timed sessions</h3><p>You have 60 minutes. A live timer and action counter keep you on track.</p></div>
+        <div class="card reveal"><div class="icon green"><?= icon('trophy') ?></div><h3>Instant AI scoring</h3><p>When you're done, an AI judge reviews your whole session and gives a score out of 100 with feedback.</p></div>
+      </div>
+    </div>
+  </section>
 
-<script src="app.js" data-has-session="<?= $hasSession ? '1' : '0' ?>"></script>
-</body>
-</html>
+  <!-- Steps -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">How to play</span>
+        <h2>Four steps from messy to clean</h2>
+      </div>
+      <div class="steps">
+        <div class="card step reveal"><h3>Enter your name</h3><p>Open the AI Agent page and start your session. Your sandbox is ready in seconds.</p></div>
+        <div class="card step reveal"><h3>Explore the data</h3><p>Ask for the shape, column types, summary statistics and missing values.</p></div>
+        <div class="card step reveal"><h3>Find &amp; fix problems</h3><p>Look for duplicates, typos and values that don't make logical sense, then clean them.</p></div>
+        <div class="card step reveal"><h3>Get your score</h3><p>Click "Get my score" once. The AI judge reviews everything you did.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="cta-band reveal">
+        <h2>Ready to <span class="grad-text">test your skills?</span></h2>
+        <p>Read the guide first if it's your first time, then jump in. The clock starts when you begin your session.</p>
+        <div class="hero-cta" style="justify-content:center">
+          <a href="agent.php" class="btn btn-primary">Access AI Agent <span aria-hidden="true">→</span></a>
+          <a href="guide.php" class="btn btn-ghost">Read the guide</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<?php page_footer(); ?>
