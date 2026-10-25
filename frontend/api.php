@@ -48,7 +48,8 @@ function rate_limit($key, $seconds) {
     $now = microtime(true);
     $last = $_SESSION['rl_' . $key] ?? 0;
     if ($now - $last < $seconds) {
-        reply(429, ['detail' => 'Too fast. Please wait a moment.']);
+        $wait = max(1, (int) ceil($seconds - ($now - $last)));
+        reply(429, ['detail' => "Please wait $wait second" . ($wait > 1 ? 's' : '') . ' and try again.']);
     }
     $_SESSION['rl_' . $key] = $now;
 }
@@ -100,10 +101,14 @@ switch ($action) {
         if ($name === '' || mb_strlen($name) > 60) {
             reply(400, ['detail' => 'Please enter your name (max 60 characters).']);
         }
-        rate_limit('start', 10);
+        // Stops double clicks; a failed start is cleared below so you can retry right away
+        rate_limit('start', 4);
         session_write_close();
 
         [$status, $data] = backend('POST', '/start', ['participant_name' => $name]);
+        if ($status !== 200) {
+            save_session(['rl_start' => null]);
+        }
         if ($status === 200) {
             session_start();
             session_regenerate_id(true);

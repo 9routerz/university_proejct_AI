@@ -208,8 +208,13 @@ $('join-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('join-error').textContent = '';
   const btn = $('join-btn');
+  if (btn.disabled) return;   // already starting: ignore extra taps
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Preparing your sandbox…';
+  // The free server sleeps when idle; tell people why the first start can be slow
+  const slow = setTimeout(() => {
+    btn.innerHTML = '<span class="spinner"></span> Waking up the server… up to a minute';
+  }, 7000);
   try {
     const name = $('name').value.trim();
     const code = $('code') ? $('code').value : '';
@@ -225,6 +230,7 @@ $('join-form').addEventListener('submit', async (e) => {
   } catch (err) {
     $('join-error').textContent = err.message;
   } finally {
+    clearTimeout(slow);
     btn.disabled = false;
     btn.innerHTML = 'Begin session <span aria-hidden="true">→</span>';
   }
