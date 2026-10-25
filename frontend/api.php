@@ -5,6 +5,10 @@
 
 require __DIR__ . '/bootstrap.php';
 header('Content-Type: application/json');
+
+// Render's free server can take ~60s to wake up; don't let PHP give up before the backend answers
+@set_time_limit(BACKEND_TIMEOUT + 20);
+ignore_user_abort(true);
 header('Cache-Control: no-store');
 
 function reply($status, $data) {
@@ -131,6 +135,17 @@ switch ($action) {
         [$status, $data] = backend('POST', '/chat', ['session_id' => $sessionId, 'message' => $message, 'model' => substr($model, 0, 100)]);
         if ($status === 404 || $status === 403) save_session(['session_id' => null]);
         reply($status, $data);
+
+    case 'ping':
+        // Called when the AI Agent page opens, so a sleeping backend wakes up while the name is typed
+        session_write_close();
+        $t = microtime(true);
+        [$status, $data] = backend('GET', '/health');
+        reply($status === 200 ? 200 : 502, [
+            'ready'   => $status === 200,
+            'seconds' => round(microtime(true) - $t, 1),
+            'detail'  => $status === 200 ? 'AI server ready' : ($data['detail'] ?? 'AI server not reachable'),
+        ]);
 
     case 'models':
         session_write_close();

@@ -645,3 +645,12 @@ body.modal-open .chat-app { filter: blur(1px); pointer-events: none; user-select
   .suggest-btn { font-size: 14px; padding: 9px 13px; }
 }
 @media (prefers-reduced-motion: reduce) { .modal, .modal-card, .suggest-panel { animation: none; } }
+
+/* ── AI server status in the name popup ─────────────────────────────────── */
+.server-status { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--muted); min-height: 1.2em; }
+.server-status:empty { display: none; }
+.server-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+.server-status.waking { color: #b45309; }
+.server-status.waking::before { animation: blink 1.2s infinite; }
+.server-status.ready { color: var(--green); }
+.server-status.down { color: var(--red); }

@@ -106,6 +106,7 @@ page_header('AI Agent', 'agent.php', 'agent-page');
     </div>
     <?php endif; ?>
     <button id="join-btn" class="btn btn-primary" type="submit">Begin session <span aria-hidden="true">→</span></button>
+    <div id="server-status" class="server-status" role="status"></div>
     <div id="join-error" class="error" role="alert"></div>
     <div class="modal-facts">
       <span><?= str_replace('<svg', '<svg width="15" height="15"', icon('clock')) ?> 60 minutes</span>

@@ -14,9 +14,33 @@ async function api(action, body) {
     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF },
     body: JSON.stringify(body || {}),
   });
-  const data = await res.json().catch(() => ({ detail: 'Bad reply from server.' }));
+  const data = await res.json().catch(() => ({
+    // Not JSON: usually the web host cut a long request off (e.g. a 504 page)
+    detail: res.status >= 500
+      ? 'The AI server is still waking up. Please tap again in a few seconds.'
+      : 'Unexpected reply from the server (HTTP ' + res.status + ').',
+  }));
   if (!res.ok) throw new Error(data.detail || 'Request failed.');
   return data;
+}
+
+// Wake the AI server while the name is being typed, and show its status in the popup
+async function wakeServer() {
+  const el = $('server-status');
+  if (!el) return;
+  el.className = 'server-status waking';
+  el.textContent = 'Connecting to the AI server…';
+  const slowNote = setTimeout(() => { el.textContent = 'Waking up the AI server… this can take up to a minute'; }, 5000);
+  try {
+    await api('ping');
+    el.className = 'server-status ready';
+    el.textContent = 'AI server ready';
+  } catch (err) {
+    el.className = 'server-status down';
+    el.textContent = err.message;
+  } finally {
+    clearTimeout(slowNote);
+  }
 }
 
 // 'join' = name popup over the chat, 'chat' = chat only, 'result' = score screen
@@ -341,7 +365,7 @@ $('score-btn').addEventListener('click', async () => {
 });
 
 // No session yet: ask for the name in the popup
-if (!HAS_SESSION) show('join');
+if (!HAS_SESSION) { show('join'); wakeServer(); }
 
 // Page reload: resume the running session
 if (HAS_SESSION) {
